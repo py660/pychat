@@ -4,7 +4,7 @@ import os
 print(crayons.yellow("Starting Application..."))
 
 print(crayons.blue("Starting Login Server..."))
-import py.login
+#import py.login
 from py.login import verifyBasic
 
 print(crayons.blue("Starting Fallback Server..."))
@@ -33,7 +33,7 @@ from py.session import verifyToken, generateToken
 import logging
 
 logging.basicConfig(level=(logging.DEBUG if os.environ.get("DEBUG") else logging.INFO))
-logger = logging.getLogger()
+logger = logging.getLogger("")
 logger.info('message')
 
 for key in db.keys():
