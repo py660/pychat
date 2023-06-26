@@ -171,32 +171,32 @@ async def GET(sid, message):
     await sio.emit('RPLY_GET', CPU.process_GET())
 
 
-@sio.event
-async def join(sid, message):
-    sio.enter_room(sid, message['room'])
-    await sio.emit('my_response', {'data': 'Entered room: ' + message['room']},
-                   room=sid)
-
-
-@sio.event
-async def leave(sid, message):
-    sio.leave_room(sid, message['room'])
-    await sio.emit('my_response', {'data': 'Left room: ' + message['room']},
-                   room=sid)
-
-
-@sio.event
-async def close_room(sid, message):
-    await sio.emit('my_response',
-                   {'data': 'Room ' + message['room'] + ' is closing.'},
-                   room=message['room'])
-    await sio.close_room(message['room'])
-
-
-@sio.event
-async def my_room_event(sid, message):
-    await sio.emit('my_response', {'data': message['data']},
-                   room=message['room'])
+#@sio.event
+#async def join(sid, message):
+#    sio.enter_room(sid, message['room'])
+#    await sio.emit('my_response', {'data': 'Entered room: ' + #message['room']},
+#                   room=sid)
+#
+#
+#@sio.event
+#async def leave(sid, message):
+#    sio.leave_room(sid, message['room'])
+#    await sio.emit('my_response', {'data': 'Left room: ' + #message['room']},
+#                   room=sid)
+#
+#
+#@sio.event
+#async def close_room(sid, message):
+#    await sio.emit('my_response',
+#                   {'data': 'Room ' + message['room'] + ' is #closing.'},
+#                   room=message['room'])
+#    await sio.close_room(message['room'])
+#
+#
+#@sio.event
+#async def my_room_event(sid, message):
+#    await sio.emit('my_response', {'data': message['data']},
+#                   room=message['room'])
 
 
 @sio.event
