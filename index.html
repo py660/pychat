@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            window.uid = document.cookie
+              .split('; ')
+              .find((row) => row.startsWith('uid='))
+              ?.split('=')[1];
+            window.token = document.cookie
+              .split('; ')
+              .find((row) => row.startsWith('token='))
+              ?.split('=')[1];
+        </script>
+        <link rel="preconnect" href="https://cdnjs.cloudfare.com">
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+        <!-- JavaScript Bundle with Popper -->
+        <script async defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+        <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <div id="disconnect-info" style="color: white; position: fixed; bottom: 3%; left: 40%; right: 40%; width: 20%; border-radius: 20px; border: solid 2px black; text-align: center; background-color: rgba(0, 0, 0, 0.6)!important; padding: 5px;"><i class="fa-solid fa-circle-xmark" style="color: red;"></i>Connecting...</div>
+        <script>
+            function getAuthData(){
+                    return {uid: window.uid, token: window.token};
+                }
+            window.onload = function(){
+                window.socket = io.connect("https://pychat.python660.repl.co")
+                var connected = -1
+                var sid = ""
+                socket.on('connect', function() {
+                    console.log("Connected!")
+                    document.querySelector("#disconnect-info").style.display = "none"
+                    socket.emit('my_event', {data: 'I\'m connected!'});
+                    sid = socket.id
+                    connected = 1
+                    socket.emit('GET', {auth: getAuthData()});
+                });
+                socket.on('disconnect', function() {
+                    document.querySelector("#disconnect-info").style.display = "block";
+                    if (connected == 0){
+                        var interval = setInterval(function(){
+                            socket.connect();
+                            //console.log("Connecting....");
+                            if (connected == 1){
+                                clearInterval(interval);
+                            }
+                        }, 2500);
+                    }
+                });
+                socket.on('RPLY_GET', function(msg) {
+                    //console.log("REPLY: GET. Recorded in //console.log");
+                    //console.log(msg);
+                    show_msg(msg);
+                });
+                socket.on('RPLY_POST', function(msg) {
+                    console.log("REPLY: POST. Recorded in //console.log");
+                    console.log(msg);
+                });
+                socket.on('UPDATE', function(msg) {
+                    console.log("UPDATE. Do something.");
+                    socket.emit('GET', {auth: getAuthData()});
+                });
+                
+                socket.emit('my_brodcast_event', {data: "nothing"});
+                //socket.volatile.emit sends and doesn't check for ACK.
+                
+                socket.on('401', function(msg){
+                    window.location = "/login.html";
+                    function delete_cookie(name) {
+                        if (get_cookie(name)){
+                            document.cookie = name + "=" + ((path) ? ";path=" + path : "") + ((domain) ? ";domain=" + domain : "") + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+                    }
+                    }
+                    delete_cookie("uid", "/", "")
+                })
+            }
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('#action_menu_btn').click(function(){
+                    $('.action_menu').toggle();
+                });
+            });
+        </script>
+        <link href="style.css" rel="stylesheet"/>
+        <title>Chat</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+    <body>
+        <div class="container-fluid h-100">
+            <div class="row justify-content-center h-100">
+                <div class="col-md-4 col-xl-3 chat">
+                    <div class="card mb-sm-3 mb-md-0 contacts_card">
+                        <div class="card-header">
+                            <div class="input-group">
+                                <input type="text" placeholder="Search..." name="" class="form-control search">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body contacts_body">
+                            <ul class="contacts">
+                                <li class="active">
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Khalid</span>
+                                            <p>Kalid is online</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Taherah Big</span>
+                                            <p>Taherah left 7 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Sami Rafi</span>
+                                            <p>Sami is online</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Nargis Hawa</span>
+                                            <p>Nargis left 30 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Rashid Samim</span>
+                                            <p>Rashid left 50 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ui>
+                        </div>
+                        <div class="card-footer"></div>
+                    </div>
+                </div>
+                <div class="col-md-8 col-xl-6 chat">
+                    <div class="card">
+                        <div class="card-header msg_head">
+                            <div class="d-flex bd-highlight">
+                                <div class="img_cont">
+                                    <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img">
+                                    <span class="online_icon"></span>
+                                </div>
+                                <div class="user_info">
+                                    <span>Chat with <i>undefined</i></span>
+                                    <p>1767 Messages</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="messages" class="card-body msg_card_body">
+                            <script>
+                                function htmlSafe(str) {
+                                    return String(str)
+                                        .replace(/&/g, '&amp;')
+                                        .replace(/</g, '&lt;')
+                                        .replace(/>/g, '&gt;')
+                                        .replace(/"/g, '&quot;');
+                                }
+                                var units = {
+                                    year  : 24 * 60 * 60 * 1000 * 365,
+                                    month : 24 * 60 * 60 * 1000 * 365/12,
+                                    day   : 24 * 60 * 60 * 1000,
+                                    hour  : 60 * 60 * 1000,
+                                    minute: 60 * 1000,
+                                    second: 1000
+                                }
+                                var rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+                                
+                                var getRelativeTime = (d1, d2 = new Date()) => {
+                                    var elapsed = d1 - d2;
+                                    //d1 = old_time
+                                    //d2 = current_time
+                                    
+                                    // "Math.abs" accounts for both "past" & "future" scenarios
+                                    for (var u in units){
+                                        if (Math.abs(elapsed) > units[u] || u == 'second'){
+                                            return (u == 'second') ? 'just now' : rtf.format(Math.round(elapsed/units[u]), u)
+                                        }
+                                    }
+                                }
+                                var backup = {id: [], messages: []};
+
+                                // Update timestamp
+                                setInterval(function(){
+                                    for (let message of backup.messages){
+                                        var a = new Date(message.date * 1000);
+                                        var d = getRelativeTime(a, new Date());
+                                        document.getElementById("time" + message.id).innerHTML = d;
+                                    }
+                                }, 200);
+                                var scrolledDown;
+
+                                function show_msg(data) {
+                                    scrolledDown = ($("#messages").innerHeight() + document.getElementById("messages").scrollTop) >= document.getElementById("messages").scrollHeight;
+                                    backup = data;
+                                    document.getElementById("messages").innerHTML = "";
+                                    for (let message of data.messages){
+                                        var a = new Date(message.date * 1000);
+                                        var d = getRelativeTime(a, new Date());
+                                        document.getElementById("messages").innerHTML += `
+                                <div class="d-flex justify-content-end mb-4 chat-item">
+                                <div class="msg_container_send">
+                                ` + htmlSafe(message.content) + `
+                                <div style="text-align: right" id="time` + message.id + `" class="msg_time_send">` + d + `</div>
+                                </div>
+                                <div class="img_cont_msg">
+                                <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img_msg">
+                                </div><div style="text-align:right" class="msg_time_send"><br/>` + message.username + `</div>
+                                </div>`;
+                                    }
+                                    var i = document.querySelectorAll('.chat-item');
+                                    // Scroll down to lates message
+                                    if (i){
+                                        if (scrolledDown){
+                                            i[i.length - 1].scrollIntoView();
+                                        }
+                                        else{
+                                        }
+                                    }
+                                }
+                                
+                            </script>
+                            <!--div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                	<img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_container">
+                                	Hi, how are you samim?
+                                	<span class="msg_time">8:40 AM, Today</span>
+                                </div>
+                                </div>
+                                
+                                                    
+                                <div class="d-flex justify-content-end mb-4">
+                                <div class="msg_container_send">
+                                	Hi Khalid i am good tnx how about you?
+                                	<span class="msg_time_send">8:55 AM, Today</span>
+                                </div>
+                                <div class="img_cont_msg">
+                                <img src="https://js-game.python660.repl.co/dynamic/12.png" class="rounded-circle user_img_msg">
+                                </div>
+                        </div-->
+                        </div>
+                        <div class="card-footer">
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                                </div>
+                                <input id="msg-box" name="" class="form-control type_msg" placeholder="Say something..."/>
+                                <div onclick="sendmsg(document.getElementById('msg-box').value);" id="submitbtn" class="input-group-append">
+                                    <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+                                </div>
+                                <script>
+                                    function sendmsg(message){
+                                        if (!message){
+                                            return;
+                                        }
+                                        document.querySelector("#msg-box").value = "";
+                                    socket.emit("POST", {username: "Mickey Mouse", content: message, auth: getAuthData()});
+                                    
+                                        var i = document.querySelectorAll('.chat-item');
+                                        i[i.length - 1].scrollIntoView({behavior: "smooth"});
+                                    }
+                                    
+                                    // Execute a function when the user presses a key on the keyboard
+                                    document.querySelector("#msg-box").addEventListener("keypress", function(event) {
+                                      // If the user presses the "Enter" key on the keyboard
+                                      if (event.key === "Enter") {
+                                        // Cancel the default action, if needed
+                                        event.preventDefault();
+                                        // Trigger the button element with a click
+                                        document.getElementById("submitbtn").click();
+                                      }
+                                    });
+                                    
+                                                                    
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
